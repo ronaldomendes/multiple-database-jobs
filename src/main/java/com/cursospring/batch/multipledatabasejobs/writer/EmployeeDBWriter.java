@@ -2,11 +2,14 @@ package com.cursospring.batch.multipledatabasejobs.writer;
 
 import com.cursospring.batch.multipledatabasejobs.model.Employee;
 import com.cursospring.batch.multipledatabasejobs.utils.Constants;
+import com.cursospring.batch.multipledatabasejobs.utils.SqlScripts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -23,8 +26,9 @@ public class EmployeeDBWriter implements ItemWriter<Employee> {
     @Override
     public void write(List<? extends Employee> employees) throws Exception {
         JdbcBatchItemWriter<Employee> writer = new JdbcBatchItemWriter<>();
+        writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
+        employees.forEach(e -> writer.setSql(SqlScripts.NEW_EMPLOYEE));
         writer.setDataSource(dataSource);
-        employees.forEach(e -> log.info("Employee={}", e.toString()));
-        log.info("Writer={}", writer.toString());
+        writer.afterPropertiesSet();
     }
 }

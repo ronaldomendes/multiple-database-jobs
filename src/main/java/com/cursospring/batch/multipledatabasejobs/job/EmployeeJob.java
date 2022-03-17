@@ -5,6 +5,7 @@ import com.cursospring.batch.multipledatabasejobs.mapper.EmployeeDBRowMapper;
 import com.cursospring.batch.multipledatabasejobs.model.Employee;
 import com.cursospring.batch.multipledatabasejobs.processor.EmployeeProcessor;
 import com.cursospring.batch.multipledatabasejobs.utils.Constants;
+import com.cursospring.batch.multipledatabasejobs.utils.SqlScripts;
 import com.cursospring.batch.multipledatabasejobs.writer.EmployeeDBWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -61,7 +62,7 @@ public class EmployeeJob {
     private ItemStreamReader<EmployeeDTO> employeeSqlReader() {
         JdbcCursorItemReader<EmployeeDTO> reader = new JdbcCursorItemReader<>();
         reader.setDataSource(sqlServerDatasource);
-        reader.setSql("SELECT * FROM TB_EMPLOYEES");
+        reader.setSql(SqlScripts.ALL_EMPLOYEES);
         reader.setRowMapper(new EmployeeDBRowMapper());
         return reader;
     }
