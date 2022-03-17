@@ -6,11 +6,9 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 @AllArgsConstructor
 @Configuration
-@EnableAsync
 public class BasicConfiguration {
 
     private final JobRepository repository;
