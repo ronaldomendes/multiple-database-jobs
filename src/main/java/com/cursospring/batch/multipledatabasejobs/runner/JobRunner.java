@@ -1,5 +1,6 @@
 package com.cursospring.batch.multipledatabasejobs.runner;
 
+import com.cursospring.batch.multipledatabasejobs.utils.Constants;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -12,11 +13,11 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-
-import static com.cursospring.batch.multipledatabasejobs.utils.Constants.CONTEXT_KEY_NAME;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -27,25 +28,26 @@ public class JobRunner {
     private final Job job;
 
     @Async
+    @Scheduled(cron = "0 0/2 * 1/1 * ?")
     public void runBatchJob() {
         JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addString(CONTEXT_KEY_NAME, "updating_databases");
+        builder.addString("uuid", UUID.randomUUID().toString());
         builder.addDate("date", new Date(), true);
         runJob(job, builder.toJobParameters());
     }
 
-    private void runJob(Job job, JobParameters jobParameters) {
+    private void runJob(Job job, JobParameters params) {
         try {
-            JobExecution execution = jobLauncher.run(job, jobParameters);
+            JobExecution execution = jobLauncher.run(job, params);
             log.info("Executing: {}", execution.toString());
         } catch (JobExecutionAlreadyRunningException e) {
-            log.error("Job with fileName: {} is already running.", jobParameters.getParameters().get(CONTEXT_KEY_NAME));
+            log.error("Job with fileName: {} is already running.", params.getParameters().get(Constants.CONTEXT_KEY_NAME));
         } catch (JobRestartException e) {
-            log.error("Job with fileName: {} was not restarted.", jobParameters.getParameters().get(CONTEXT_KEY_NAME));
+            log.error("Job with fileName: {} was not restarted.", params.getParameters().get(Constants.CONTEXT_KEY_NAME));
         } catch (JobInstanceAlreadyCompleteException e) {
-            log.error("Job with fileName: {} already completed.", jobParameters.getParameters().get(CONTEXT_KEY_NAME));
+            log.error("Job with fileName: {} already completed.", params.getParameters().get(Constants.CONTEXT_KEY_NAME));
         } catch (JobParametersInvalidException e) {
-            log.error("Invalid job parameters: {}.", jobParameters.getParameters().get(CONTEXT_KEY_NAME));
+            log.error("Invalid job parameters: {}.", params.getParameters().get(Constants.CONTEXT_KEY_NAME));
         }
     }
 }

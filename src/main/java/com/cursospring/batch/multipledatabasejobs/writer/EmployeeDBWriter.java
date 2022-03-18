@@ -9,7 +9,6 @@ import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourc
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -26,9 +25,8 @@ public class EmployeeDBWriter implements ItemWriter<Employee> {
     @Override
     public void write(List<? extends Employee> employees) throws Exception {
         JdbcBatchItemWriter<Employee> writer = new JdbcBatchItemWriter<>();
-        writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
-        employees.forEach(e -> writer.setSql(SqlScripts.NEW_EMPLOYEE));
         writer.setDataSource(dataSource);
-        writer.afterPropertiesSet();
+        writer.setSql(SqlScripts.NEW_EMPLOYEE);
+        writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
     }
 }

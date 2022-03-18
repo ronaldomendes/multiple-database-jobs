@@ -59,7 +59,7 @@ public class DatabaseConfiguration {
     public LocalContainerEntityManagerFactoryBean managerFactoryBean(EntityManagerFactoryBuilder builder) {
         Map<String, Object> properties = new HashMap<>();
         properties.put("hibernate.hbm2ddl.auto", "update");
-        return builder.dataSource(getH2BatchDataSource())
+        return builder.dataSource(getPostgresBatchDataSource())
                 .packages("com.cursospring.batch.multipledatabasejobs")
                 .persistenceUnit("default")
                 .properties(properties)
