@@ -6,12 +6,13 @@ import com.cursospring.batch.multipledatabasejobs.model.Employee;
 import com.cursospring.batch.multipledatabasejobs.processor.EmployeeProcessor;
 import com.cursospring.batch.multipledatabasejobs.utils.Constants;
 import com.cursospring.batch.multipledatabasejobs.utils.SqlScripts;
-import com.cursospring.batch.multipledatabasejobs.writer.EmployeeDBWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemStreamReader;
+import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,9 +42,6 @@ public class EmployeeJob {
     @Autowired
     private EmployeeProcessor employeeProcessor;
 
-    @Autowired
-    private EmployeeDBWriter employeeDBWriter;
-
     @Bean
     @Qualifier(value = "employeeJobUpdate")
     public Job employeeDatabaseJob() throws Exception {
@@ -55,15 +53,25 @@ public class EmployeeJob {
                 .<EmployeeDTO, Employee>chunk(Constants.CHUNK_SIZE)
                 .reader(employeeSqlReader())
                 .processor(employeeProcessor)
-                .writer(employeeDBWriter)
+                .writer(employeeSqlWriter())
                 .build();
     }
 
-    private ItemStreamReader<EmployeeDTO> employeeSqlReader() {
+    @Bean
+    public ItemStreamReader<EmployeeDTO> employeeSqlReader() {
         JdbcCursorItemReader<EmployeeDTO> reader = new JdbcCursorItemReader<>();
         reader.setDataSource(sqlServerDatasource);
         reader.setSql(SqlScripts.ALL_EMPLOYEES);
         reader.setRowMapper(new EmployeeDBRowMapper());
         return reader;
+    }
+
+    @Bean
+    public JdbcBatchItemWriter<Employee> employeeSqlWriter() {
+        JdbcBatchItemWriter<Employee> writer = new JdbcBatchItemWriter<>();
+        writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
+        writer.setSql(SqlScripts.NEW_EMPLOYEE);
+        writer.setDataSource(postgresDatasource);
+        return writer;
     }
 }
